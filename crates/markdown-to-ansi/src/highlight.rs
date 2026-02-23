@@ -1,6 +1,7 @@
+use core::fmt::Write;
 use std::sync::LazyLock;
 
-use syntect::highlighting::ThemeSet;
+use syntect::highlighting::{Color, Style, ThemeSet};
 use syntect::parsing::SyntaxSet;
 
 use ansi_term_styles::RESET;
@@ -91,6 +92,58 @@ pub(crate) fn visible_width(s: &str) -> usize {
     width
 }
 
+/// Blend a foreground color over a background when the foreground has alpha < 255.
+#[allow(clippy::cast_possible_truncation)] // values are always in 0..=255 after /255
+fn blend_fg(fg: Color, bg: Color) -> Color {
+    if fg.a == 0xff {
+        return fg;
+    }
+    let ratio = u32::from(fg.a);
+    let inv = 255 - ratio;
+    Color {
+        r: ((u32::from(fg.r) * ratio + u32::from(bg.r) * inv) / 255) as u8,
+        g: ((u32::from(fg.g) * ratio + u32::from(bg.g) * inv) / 255) as u8,
+        b: ((u32::from(fg.b) * ratio + u32::from(bg.b) * inv) / 255) as u8,
+        a: 255,
+    }
+}
+
+/// Write styled ranges to `out` as 24-bit ANSI escape sequences, only emitting
+/// escape codes when the color actually changes between spans.
+/// Returns the visible character width of the content written.
+fn write_ranges(out: &mut String, ranges: &[(Style, &str)], emit_bg: bool) -> usize {
+    let mut cur_foreground: Option<Color> = None;
+    let mut cur_background: Option<Color> = None;
+    let mut width: usize = 0;
+
+    for &(style, text) in ranges {
+        let text = text.trim_end_matches('\n');
+        if text.is_empty() {
+            continue;
+        }
+
+        if emit_bg {
+            let bg = style.background;
+            if cur_background != Some(bg) {
+                let _ = write!(out, "\x1b[48;2;{};{};{}m", bg.r, bg.g, bg.b);
+                cur_background = Some(bg);
+            }
+        }
+
+        let fg = blend_fg(style.foreground, style.background);
+        if cur_foreground != Some(fg) {
+            let _ = write!(out, "\x1b[38;2;{};{};{}m", fg.r, fg.g, fg.b);
+            cur_foreground = Some(fg);
+        }
+
+        out.push_str(text);
+        // All highlight text is ASCII/simple, so len() is fine for width;
+        // but use chars to be safe with multibyte.
+        width += text.chars().count();
+    }
+    width
+}
+
 /// Syntax-highlight a code block using syntect, with background padding.
 ///
 /// When color or syntax highlighting is disabled, returns the code unchanged.
@@ -123,17 +176,13 @@ pub(crate) fn highlight_code_block(
     for line in syntect::util::LinesWithEndings::from(code) {
         match h.highlight_line(line, syntax_set) {
             Ok(ranges) => {
-                let highlighted = syntect::util::as_24_bit_terminal_escaped(&ranges, code_bg);
-                let highlighted = highlighted.trim_end_matches('\n');
-
                 if let Some(ref bg_code) = bg {
-                    let content_width = visible_width(highlighted);
-                    let padding = full_width.saturating_sub(content_width);
                     out.push_str(bg_code);
-                    out.push_str(highlighted);
+                }
+                let content_width = write_ranges(&mut out, &ranges, code_bg);
+                if bg.is_some() {
+                    let padding = full_width.saturating_sub(content_width);
                     out.extend(core::iter::repeat_n(' ', padding));
-                } else {
-                    out.push_str(highlighted);
                 }
                 out.push_str(RESET);
                 out.push('\n');
