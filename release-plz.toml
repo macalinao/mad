@@ -1,0 +1,3 @@
+[[package]]
+name = "mad"
+git_tag_name = "v{{ version }}"
