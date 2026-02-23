@@ -27,6 +27,10 @@ enum Command {
         #[bpaf(short, long)]
         no_highlight: bool,
 
+        /// Disable background colors on syntax-highlighted code blocks
+        #[bpaf(long)]
+        no_code_background_color: bool,
+
         /// Wrap text to specified width (defaults to terminal width)
         #[bpaf(short, long, argument("COLS"))]
         width: Option<usize>,
@@ -53,15 +57,21 @@ fn main() {
         }
         Command::Render {
             no_highlight,
+            no_code_background_color,
             width,
             file,
         } => {
-            render(no_highlight, width, file);
+            render(no_highlight, no_code_background_color, width, file);
         }
     }
 }
 
-fn render(no_highlight: bool, width: Option<usize>, file: Option<PathBuf>) {
+fn render(
+    no_highlight: bool,
+    no_code_background_color: bool,
+    width: Option<usize>,
+    file: Option<PathBuf>,
+) {
     let input = if let Some(path) = file {
         match std::fs::read_to_string(&path) {
             Ok(contents) => contents,
@@ -89,6 +99,7 @@ fn render(no_highlight: bool, width: Option<usize>, file: Option<PathBuf>) {
     let render_opts = markdown_to_ansi::Options {
         syntax_highlight: !no_highlight,
         width,
+        code_bg: !no_code_background_color,
     };
 
     let output = markdown_to_ansi::render(&input, &render_opts);
@@ -105,10 +116,12 @@ mod tests {
         match opts.command {
             Command::Render {
                 no_highlight,
+                no_code_background_color,
                 width,
                 file,
             } => {
                 assert!(!no_highlight);
+                assert!(!no_code_background_color);
                 assert!(width.is_none());
                 assert!(file.is_none());
             }
@@ -132,15 +145,23 @@ mod tests {
     #[test]
     fn cli_parse_all_flags() {
         let opts = cli()
-            .run_inner(&["--no-highlight", "--width", "120", "test.md"])
+            .run_inner(&[
+                "--no-highlight",
+                "--no-code-background-color",
+                "--width",
+                "120",
+                "test.md",
+            ])
             .expect("should parse all flags");
         match opts.command {
             Command::Render {
                 no_highlight,
+                no_code_background_color,
                 width,
                 file,
             } => {
                 assert!(no_highlight);
+                assert!(no_code_background_color);
                 assert_eq!(width, Some(120));
                 assert_eq!(file, Some(PathBuf::from("test.md")));
             }
@@ -156,10 +177,12 @@ mod tests {
         match opts.command {
             Command::Render {
                 no_highlight,
+                no_code_background_color,
                 width,
                 ..
             } => {
                 assert!(no_highlight);
+                assert!(!no_code_background_color);
                 assert_eq!(width, Some(80));
             }
             Command::Man => panic!("expected Render"),

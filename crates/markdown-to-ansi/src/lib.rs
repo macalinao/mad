@@ -15,6 +15,13 @@ pub struct Options {
     /// Available column width for text wrapping and code block background padding.
     /// `None` means no wrapping; code blocks default to 80 columns.
     pub width: Option<usize>,
+    /// Whether to draw background colors on syntax-highlighted code blocks.
+    ///
+    /// When `true` (the default), code blocks get a dark background that
+    /// extends to the full column width.  When `false`, only foreground
+    /// syntax colours are emitted — useful for screenshot tools that do not
+    /// render per-character backgrounds well.
+    pub code_bg: bool,
 }
 
 /// Render markdown to ANSI text (block-level: paragraphs, headers, code blocks, lists, tables).
@@ -42,6 +49,7 @@ mod tests {
         Options {
             syntax_highlight: true,
             width: None,
+            code_bg: true,
         }
     }
 
@@ -119,6 +127,7 @@ mod tests {
         let no_highlight = Options {
             syntax_highlight: false,
             width: None,
+            code_bg: true,
         };
         let input = "Before\n\n```toml\n[package]\nname = \"test\"\n```\n\nAfter";
         let result = render(input, &no_highlight);
@@ -216,6 +225,7 @@ mod tests {
             &Options {
                 syntax_highlight: true,
                 width: Some(30),
+                code_bg: true,
             },
         );
         for line in result.trim_end().split('\n') {
@@ -237,6 +247,7 @@ mod tests {
             &Options {
                 syntax_highlight: true,
                 width: Some(20),
+                code_bg: true,
             },
         );
         for line in result.trim_end().split('\n') {

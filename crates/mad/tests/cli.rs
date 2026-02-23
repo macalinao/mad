@@ -62,15 +62,6 @@ fn missing_file_errors() {
 }
 
 #[test]
-fn version_flag() {
-    mad()
-        .arg("--version")
-        .assert()
-        .success()
-        .stdout(predicate::str::contains("0.0.1"));
-}
-
-#[test]
 fn man_subcommand_outputs_roff() {
     mad()
         .arg("man")

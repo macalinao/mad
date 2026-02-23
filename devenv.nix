@@ -3,6 +3,7 @@
 {
   packages = with pkgs; [
     git
+    termshot
     inputs.lintel.packages.${pkgs.system}.cargo-furnish
   ];
 

@@ -12,7 +12,7 @@ Converts `CommonMark` Markdown into richly formatted ANSI terminal output. Power
 ### Supported elements
 
 - **Headings** (bold)
-- **Bold**, *italic*, and inline `code` (colored)
+- **Bold**, _italic_, and inline `code` (colored)
 - **Links** rendered as clickable [OSC 8](https://gist.github.com/egmontkob/eb114294efbcd5adb1944c9f3cb5feda) terminal hyperlinks
 - **Fenced code blocks** with syntax highlighting and background padding
 - **Tables** with Unicode box-drawing borders, alignment, and bold headers
@@ -33,6 +33,7 @@ use markdown_to_ansi::{render, render_inline, Options};
 let opts = Options {
     syntax_highlight: true,
     width: Some(80),
+    code_bg: true,
 };
 
 // Full document rendering

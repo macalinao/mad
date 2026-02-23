@@ -292,7 +292,10 @@ fn flush_code_block(out: &mut String, st: &mut RenderState, opts: &crate::Option
 
     if opts.syntax_highlight {
         out.push_str(&crate::highlight::highlight_code_block(
-            &code, &lang, opts.width,
+            &code,
+            &lang,
+            opts.width,
+            opts.code_bg,
         ));
     } else if lang.is_empty() {
         out.push_str("```\n");

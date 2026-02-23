@@ -98,7 +98,12 @@ pub(crate) fn visible_width(s: &str) -> usize {
 ///
 /// The background extends from the first content column to `width` columns.
 /// The caller is responsible for prepending any indent before each output line.
-pub(crate) fn highlight_code_block(code: &str, lang: &str, width: Option<usize>) -> String {
+pub(crate) fn highlight_code_block(
+    code: &str,
+    lang: &str,
+    width: Option<usize>,
+    code_bg: bool,
+) -> String {
     let (syntax_set, syntax) = find_syntax(lang);
     let theme = &THEME_SET.themes["base16-ocean.dark"];
     let mut h = syntect::easy::HighlightLines::new(syntax, theme);
@@ -106,15 +111,19 @@ pub(crate) fn highlight_code_block(code: &str, lang: &str, width: Option<usize>)
 
     let full_width = width.unwrap_or(80);
 
-    let bg = theme
-        .settings
-        .background
-        .map(|c| format!("\x1b[48;2;{};{};{}m", c.r, c.g, c.b));
+    let bg = if code_bg {
+        theme
+            .settings
+            .background
+            .map(|c| format!("\x1b[48;2;{};{};{}m", c.r, c.g, c.b))
+    } else {
+        None
+    };
 
     for line in syntect::util::LinesWithEndings::from(code) {
         match h.highlight_line(line, syntax_set) {
             Ok(ranges) => {
-                let highlighted = syntect::util::as_24_bit_terminal_escaped(&ranges, true);
+                let highlighted = syntect::util::as_24_bit_terminal_escaped(&ranges, code_bg);
                 let highlighted = highlighted.trim_end_matches('\n');
 
                 if let Some(ref bg_code) = bg {

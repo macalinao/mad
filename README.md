@@ -1,22 +1,32 @@
 # mad
 
-**Markdown in your terminal, beautifully rendered.**
+**`cat`, but for Markdown.** Read any Markdown file right in your terminal -- beautifully.
 
-`mad` is a fast Markdown terminal renderer written in Rust. It takes Markdown files and renders them as richly formatted ANSI output with syntax-highlighted code blocks, clickable hyperlinks, tables, and intelligent text wrapping.
+`mad` renders Markdown as richly formatted terminal output with syntax-highlighted code blocks, clickable hyperlinks, Unicode tables, and smart text wrapping. No browser, no GUI, no friction. Just `mad README.md`.
+
+![mad rendering Markdown in a terminal](screenshots/hero.png)
 
 ## Features
 
-- **Syntax-highlighted code blocks** powered by [syntect](https://github.com/trishume/syntect) with the base16-ocean.dark theme and 50+ extra language syntaxes
+- **Syntax highlighting for 50+ languages** -- powered by [syntect](https://github.com/trishume/syntect) with the base16-ocean.dark theme
 - **Clickable hyperlinks** via [OSC 8](https://gist.github.com/egmontkob/eb114294efbcd5adb1944c9f3cb5feda) terminal sequences
-- **Tables** with Unicode box-drawing borders, alignment, and bold headers
-- **Smart text wrapping** respects terminal width and preserves ANSI escape sequences
-- **Headings, bold, italic, lists** all rendered with proper ANSI formatting
-- **Reads from files or stdin** for easy integration with pipes and scripts
-- **Fast** no runtime overhead from syntax parsing; extra syntaxes are precompiled at build time
+- **Unicode tables** with box-drawing borders, alignment, and bold headers
+- **Smart text wrapping** that respects terminal width and preserves ANSI escape sequences
+- **Headings, bold, italic, strikethrough, lists** -- all rendered with proper formatting
+- **Reads from files or stdin** -- pipe it, script it, alias it
+- **Fast** -- extra syntaxes are precompiled at build time, zero runtime overhead
+
+### Code Highlighting
+
+![Syntax-highlighted Rust and TypeScript code](screenshots/code.png)
+
+### Tables
+
+![Unicode table rendering](screenshots/table.png)
 
 ## Installation
 
-### From source
+### From crates.io
 
 ```bash
 cargo install mad
@@ -25,10 +35,10 @@ cargo install mad
 ### With Nix
 
 ```bash
-# Run directly
+# Run it right now, no install needed
 nix run github:macalinao/mad -- README.md
 
-# Install into your profile
+# Or install into your profile
 nix profile install github:macalinao/mad
 ```
 
@@ -51,36 +61,27 @@ nix profile install github:macalinao/mad
 mad README.md
 
 # Pipe from stdin
-cat README.md | mad
-
-# Disable syntax highlighting
-mad --no-highlight README.md
+curl -s https://raw.githubusercontent.com/macalinao/mad/master/README.md | mad
 
 # Set a custom width
 mad --width 100 README.md
+
+# Disable syntax highlighting
+mad --no-highlight README.md
 ```
 
 ### Options
 
-| Flag | Short | Description |
-| --- | --- | --- |
-| `--no-highlight` | `-n` | Disable syntax highlighting for code blocks |
-| `--width <COLS>` | `-w` | Wrap text to specified width (defaults to terminal width) |
-| `--version` | | Print version |
-| `--help` | `-h` | Print help |
+| Flag             | Short | Description                                               |
+| ---------------- | ----- | --------------------------------------------------------- |
+| `--no-highlight` | `-n`  | Disable syntax highlighting for code blocks               |
+| `--width <COLS>` | `-w`  | Wrap text to specified width (defaults to terminal width) |
+| `--version`      |       | Print version                                             |
+| `--help`         | `-h`  | Print help                                                |
 
-## Crates
+## Library
 
-| Crate | Description |
-| --- | --- |
-| [`mad`](crates/mad) | CLI binary |
-| [`markdown-to-ansi`](crates/markdown-to-ansi) | Library: render Markdown to ANSI terminal text |
-| [`ansi-term-styles`](crates/ansi-term-styles) | `no_std` ANSI escape code constants |
-| [`sublime-syntaxes`](crates/sublime-syntaxes) | Precompiled extra syntax definitions for syntect |
-
-## Library Usage
-
-The rendering engine is available as a standalone library:
+The rendering engine is available as a standalone crate: [`markdown-to-ansi`](crates/markdown-to-ansi). Use it to embed beautiful Markdown rendering in your own CLI tools.
 
 ```rust
 use markdown_to_ansi::{render, Options};
@@ -88,11 +89,21 @@ use markdown_to_ansi::{render, Options};
 let opts = Options {
     syntax_highlight: true,
     width: Some(80),
+    code_bg: true,
 };
 
 let output = render("# Hello\n\nThis is **bold**.", &opts);
 println!("{output}");
 ```
+
+## Crates
+
+| Crate                                         | Description                                      |
+| --------------------------------------------- | ------------------------------------------------ |
+| [`mad`](crates/mad)                           | CLI binary                                       |
+| [`markdown-to-ansi`](crates/markdown-to-ansi) | Library: render Markdown to ANSI terminal text   |
+| [`ansi-term-styles`](crates/ansi-term-styles) | `no_std` ANSI escape code constants              |
+| [`sublime-syntaxes`](crates/sublime-syntaxes) | Precompiled extra syntax definitions for syntect |
 
 ## License
 
