@@ -14,7 +14,7 @@ categories = ["command-line-utilities", "text-processing"]
 workspace = true
 
 [dependencies]
-bpaf = { version = "0.9", features = ["derive", "bright-color", "dull-color", "docgen"] }
+bpaf = { version = "0.9", features = ["derive", "bright-color", "dull-color", "docgen", "autocomplete"] }
 markdown-to-ansi = { version = "0.2.0", path = "../markdown-to-ansi" }
 terminal_size = "0.4"
 
