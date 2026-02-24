@@ -1,7 +1,8 @@
 #![doc = include_str!("../README.md")]
 
-use std::io::{self, IsTerminal, Read};
+use std::io::{self, IsTerminal, Read, Write};
 use std::path::PathBuf;
+use std::process::{Command as ProcessCommand, Stdio};
 
 use bpaf::Bpaf;
 
@@ -31,6 +32,10 @@ enum Command {
         #[bpaf(long)]
         no_code_background_color: bool,
 
+        /// Do not pipe output through a pager
+        #[bpaf(long)]
+        no_pager: bool,
+
         /// Wrap text to specified width (defaults to terminal width)
         #[bpaf(short, long, argument("COLS"))]
         width: Option<usize>,
@@ -58,21 +63,31 @@ fn main() {
         Command::Render {
             no_highlight,
             no_code_background_color,
+            no_pager,
             width,
             file,
         } => {
-            render(no_highlight, no_code_background_color, width, file);
+            let input = read_input(file);
+
+            let term_size = terminal_size::terminal_size();
+            let width =
+                width.or_else(|| term_size.map(|(terminal_size::Width(w), _)| usize::from(w)));
+            let term_height = term_size.map(|(_, terminal_size::Height(h))| usize::from(h));
+
+            let render_opts = markdown_to_ansi::Options {
+                syntax_highlight: !no_highlight,
+                width,
+                code_bg: !no_code_background_color,
+            };
+
+            let output = markdown_to_ansi::render(&input, &render_opts);
+            print_or_page(&output, no_pager, term_height);
         }
     }
 }
 
-fn render(
-    no_highlight: bool,
-    no_code_background_color: bool,
-    width: Option<usize>,
-    file: Option<PathBuf>,
-) {
-    let input = if let Some(path) = file {
+fn read_input(file: Option<PathBuf>) -> String {
+    if let Some(path) = file {
         match std::fs::read_to_string(&path) {
             Ok(contents) => contents,
             Err(e) => {
@@ -90,20 +105,51 @@ fn render(
             std::process::exit(1);
         }
         buf
-    };
+    }
+}
 
-    let width = width.or_else(|| {
-        terminal_size::terminal_size().map(|(terminal_size::Width(w), _)| usize::from(w))
-    });
+fn print_or_page(output: &str, no_pager: bool, term_height: Option<usize>) {
+    if no_pager || !io::stdout().is_terminal() {
+        print!("{output}");
+        return;
+    }
 
-    let render_opts = markdown_to_ansi::Options {
-        syntax_highlight: !no_highlight,
-        width,
-        code_bg: !no_code_background_color,
-    };
+    if let Some(height) = term_height {
+        let line_count = output.lines().count();
+        if line_count <= height {
+            print!("{output}");
+            return;
+        }
+    }
 
-    let output = markdown_to_ansi::render(&input, &render_opts);
-    print!("{output}");
+    if spawn_pager(output).is_err() {
+        print!("{output}");
+    }
+}
+
+fn spawn_pager(output: &str) -> io::Result<()> {
+    let pager_env = std::env::var("PAGER").unwrap_or_else(|_| "less".to_string());
+    let mut parts = pager_env.split_whitespace();
+    let cmd = parts.next().unwrap_or("less");
+    let mut args: Vec<&str> = parts.collect();
+
+    // Ensure less gets -R for ANSI escape code passthrough
+    if cmd.ends_with("less") && !args.iter().any(|a| a.contains('R')) {
+        args.push("-R");
+    }
+
+    let mut child = ProcessCommand::new(cmd)
+        .args(&args)
+        .stdin(Stdio::piped())
+        .spawn()?;
+
+    if let Some(mut stdin) = child.stdin.take() {
+        // Ignore broken pipe — user quit the pager early
+        let _ = stdin.write_all(output.as_bytes());
+    }
+
+    let _ = child.wait();
+    Ok(())
 }
 
 #[cfg(test)]
@@ -117,11 +163,13 @@ mod tests {
             Command::Render {
                 no_highlight,
                 no_code_background_color,
+                no_pager,
                 width,
                 file,
             } => {
                 assert!(!no_highlight);
                 assert!(!no_code_background_color);
+                assert!(!no_pager);
                 assert!(width.is_none());
                 assert!(file.is_none());
             }
@@ -148,6 +196,7 @@ mod tests {
             .run_inner(&[
                 "--no-highlight",
                 "--no-code-background-color",
+                "--no-pager",
                 "--width",
                 "120",
                 "test.md",
@@ -157,11 +206,13 @@ mod tests {
             Command::Render {
                 no_highlight,
                 no_code_background_color,
+                no_pager,
                 width,
                 file,
             } => {
                 assert!(no_highlight);
                 assert!(no_code_background_color);
+                assert!(no_pager);
                 assert_eq!(width, Some(120));
                 assert_eq!(file, Some(PathBuf::from("test.md")));
             }
