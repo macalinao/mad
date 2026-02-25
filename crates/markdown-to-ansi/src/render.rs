@@ -1,7 +1,7 @@
 use core::fmt::Write;
 use core::mem::take;
 
-use pulldown_cmark::{Alignment, CodeBlockKind, Event, Tag, TagEnd};
+use pulldown_cmark::{Alignment, CodeBlockKind, Event, HeadingLevel, Tag, TagEnd};
 
 use crate::wrap::wrap_text;
 use ansi_term_styles::{BLUE, BOLD, DIM, ITALIC, LINK_END, LINK_MID, LINK_START, RESET, UNDERLINE};
@@ -82,14 +82,26 @@ pub(crate) fn render_events<'a>(
                 }
             }
 
-            Event::Start(Tag::Heading { .. }) => {
+            Event::Start(Tag::Heading { level, .. }) => {
                 flush_text(&mut out, &mut st, opts.width);
-                st.text_buf.push_str(BOLD);
+                match level {
+                    HeadingLevel::H1 | HeadingLevel::H2 => {
+                        st.text_buf.push_str(BOLD);
+                        st.text_buf.push_str(UNDERLINE);
+                    }
+                    _ => {
+                        st.text_buf.push_str(BOLD);
+                    }
+                }
             }
-            Event::End(TagEnd::Heading(_)) => {
+            Event::End(TagEnd::Heading(level)) => {
                 st.text_buf.push_str(RESET);
                 flush_text(&mut out, &mut st, opts.width);
-                out.push('\n');
+                if level == HeadingLevel::H1 {
+                    out.push_str("\n\n");
+                } else {
+                    out.push('\n');
+                }
             }
 
             Event::Start(Tag::CodeBlock(kind)) => {

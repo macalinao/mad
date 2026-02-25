@@ -43,7 +43,7 @@ pub fn render_inline(text: &str, opts: &Options) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use ansi_term_styles::{BLUE, BOLD, UNDERLINE};
+    use ansi_term_styles::{BLUE, BOLD, RESET, UNDERLINE};
 
     fn opts() -> Options {
         Options {
@@ -74,11 +74,31 @@ mod tests {
     }
 
     #[test]
-    fn heading_bolded() {
+    fn h1_bold_underline_extra_newline() {
         let result = render("# My Header\nSome text", &opts());
-        assert!(result.contains(BOLD));
+        assert!(result.contains(BOLD), "H1 should be bold");
+        assert!(result.contains(UNDERLINE), "H1 should be underlined");
         assert!(result.contains("My Header"));
         assert!(!result.contains("# "));
+        // H1 gets an extra blank line after it.
+        assert!(
+            result.contains(&format!("{RESET}\n\n")),
+            "H1 should have extra newline, got: {result:?}"
+        );
+    }
+
+    #[test]
+    fn h2_bold_underline() {
+        let result = render("## Subheading\nSome text", &opts());
+        assert!(result.contains(BOLD), "H2 should be bold");
+        assert!(result.contains(UNDERLINE), "H2 should be underlined");
+    }
+
+    #[test]
+    fn h3_bold_no_underline() {
+        let result = render("### Minor\nSome text", &opts());
+        assert!(result.contains(BOLD), "H3 should be bold");
+        assert!(!result.contains(UNDERLINE), "H3 should not be underlined");
     }
 
     #[test]
