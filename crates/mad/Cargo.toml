@@ -1,6 +1,6 @@
 [package]
 name = "mad"
-version = "0.1.0"
+version = "0.1.1"
 edition.workspace = true
 authors.workspace = true
 description = "A fast Markdown terminal renderer with syntax highlighting"
@@ -15,7 +15,7 @@ workspace = true
 
 [dependencies]
 bpaf = { version = "0.9", features = ["derive", "bright-color", "dull-color", "docgen", "autocomplete"] }
-markdown-to-ansi = { version = "0.2.0", path = "../markdown-to-ansi" }
+markdown-to-ansi = { version = "0.2.1", path = "../markdown-to-ansi" }
 terminal_size = "0.4"
 
 [dev-dependencies]
