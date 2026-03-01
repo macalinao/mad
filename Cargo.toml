@@ -3,11 +3,11 @@ members = ["crates/*"]
 resolver = "2"
 
 [workspace.package]
-edition = "2024"
-repository = "https://github.com/macalinao/mad"
-license = "Apache-2.0"
 authors = ["Ian Macalinao <me@ianm.com>"]
+edition = "2024"
 homepage = "https://github.com/macalinao/mad"
+license = "Apache-2.0"
+repository = "https://github.com/macalinao/mad"
 
 [workspace.lints.clippy]
 pedantic = { level = "warn", priority = -1 }

@@ -1,14 +1,14 @@
 [package]
 name = "sublime-syntaxes"
 version = "0.2.0"
-edition.workspace = true
 authors.workspace = true
-description = "Precompiled Sublime Text syntax definitions for languages not in syntect's defaults"
-license.workspace = true
-repository.workspace = true
+categories = ["text-processing"]
+edition.workspace = true
 homepage.workspace = true
 keywords = ["syntax-highlighting", "syntect", "sublime-syntax"]
-categories = ["text-processing"]
+license.workspace = true
+repository.workspace = true
+description = "Precompiled Sublime Text syntax definitions for languages not in syntect's defaults"
 
 [lints]
 workspace = true
@@ -17,6 +17,4 @@ workspace = true
 syntect = { version = "5", default-features = false, features = ["default-syntaxes", "regex-fancy"] }
 
 [build-dependencies]
-syntect = { version = "5", default-features = false, features = [
-    "default-syntaxes", "regex-fancy", "yaml-load",
-] }
+syntect = { version = "5", default-features = false, features = ["default-syntaxes", "regex-fancy", "yaml-load"] }

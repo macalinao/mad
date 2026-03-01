@@ -1,14 +1,14 @@
 [package]
 name = "markdown-to-ansi"
 version = "0.2.1"
-edition.workspace = true
 authors.workspace = true
-description = "Render Markdown as ANSI-formatted terminal text"
-license.workspace = true
-repository.workspace = true
+categories = ["command-line-utilities", "text-processing"]
+edition.workspace = true
 homepage.workspace = true
 keywords = ["markdown", "ansi", "terminal", "cli"]
-categories = ["command-line-utilities", "text-processing"]
+license.workspace = true
+repository.workspace = true
+description = "Render Markdown as ANSI-formatted terminal text"
 
 [lints]
 workspace = true
@@ -17,6 +17,4 @@ workspace = true
 ansi-term-styles = { version = "0.1.0", path = "../ansi-term-styles" }
 pulldown-cmark = { version = "0.13", default-features = false }
 sublime-syntaxes = { version = "0.2.0", path = "../sublime-syntaxes" }
-syntect = { version = "5", default-features = false, features = [
-    "default-syntaxes", "default-themes", "regex-fancy",
-] }
+syntect = { version = "5", default-features = false, features = ["default-syntaxes", "default-themes", "regex-fancy"] }

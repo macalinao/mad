@@ -1,14 +1,14 @@
 [package]
 name = "mad"
 version = "0.1.1"
-edition.workspace = true
 authors.workspace = true
-description = "A fast Markdown terminal renderer with syntax highlighting"
-license.workspace = true
-repository.workspace = true
+categories = ["command-line-utilities", "text-processing"]
+edition.workspace = true
 homepage.workspace = true
 keywords = ["markdown", "terminal", "ansi", "cli", "renderer"]
-categories = ["command-line-utilities", "text-processing"]
+license.workspace = true
+repository.workspace = true
+description = "A fast Markdown terminal renderer with syntax highlighting"
 
 [lints]
 workspace = true

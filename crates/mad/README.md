@@ -42,12 +42,12 @@ mad --width 100 README.md
 
 ### Options
 
-| Flag | Short | Description |
-| --- | --- | --- |
-| \`--no-highlight\` | \`-n\` | Disable syntax highlighting for code blocks |
+| Flag               | Short  | Description                                               |
+| ------------------ | ------ | --------------------------------------------------------- |
+| \`--no-highlight\` | \`-n\` | Disable syntax highlighting for code blocks               |
 | \`--width <COLS>\` | \`-w\` | Wrap text to specified width (defaults to terminal width) |
-| \`--version\` | | Print version |
-| \`--help\` | \`-h\` | Print help |
+| \`--version\`      |        | Print version                                             |
+| \`--help\`         | \`-h\` | Print help                                                |
 
 ## License
 
