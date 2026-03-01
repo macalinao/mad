@@ -19,7 +19,7 @@ dependencies = [
 
 [[package]]
 name = "ansi-term-styles"
-version = "0.1.0"
+version = "0.1.1"
 
 [[package]]
 name = "anstyle"
@@ -298,7 +298,7 @@ checksum = "5e5032e24019045c762d3c0f28f5b6b8bbf38563a65908389bf7978758920897"
 
 [[package]]
 name = "mad"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "assert_cmd",
  "bpaf",
@@ -310,7 +310,7 @@ dependencies = [
 
 [[package]]
 name = "markdown-to-ansi"
-version = "0.2.1"
+version = "0.2.2"
 dependencies = [
  "ansi-term-styles",
  "pulldown-cmark",
@@ -543,7 +543,7 @@ checksum = "e320a6c5ad31d271ad523dcf3ad13e2767ad8b1cb8f047f75a8aeaf8da139da2"
 
 [[package]]
 name = "sublime-syntaxes"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "syntect",
 ]
